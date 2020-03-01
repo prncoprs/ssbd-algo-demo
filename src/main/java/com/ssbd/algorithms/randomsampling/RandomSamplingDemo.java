@@ -29,7 +29,17 @@ import java.util.Random;
 
 /**
  * @ClassName RandomSamplingDemo
- * @Description TODO
+ *
+ * @Description This class shows a very simple demo procedure of random sampling algorithm. The random sampling
+ * algorithm is introduced in section 2.2 and page 36 of <i>Small Summaries for Big Data</i> by
+ * <i>Graham Cormode and Ke Yi</i>.
+ *
+ * This class uses List<Long> to show the main procedure of the algorithm. And in this demo, we use the Long type
+ * data to simulate a data set. We generate a sequence from 1 to 10000, and we separate them to odd numbers and even
+ * numbers to construct the set1 and set2. Then we do the Update algorithm on these two sets, which leads us to get
+ * sample sets of them. Finally we use Merge algorithm to merge the two sample sets and get a final summary of the
+ * original set.
+ *
  * @Author Chaoqi ZHANG
  * @Date 2020/2/29
  */
@@ -61,26 +71,46 @@ public class RandomSamplingDemo {
 
         // get summary of set2
         List<Long> set2List = set2.collect();
-        List<Long> summaryOfSet2List = ssbdRandomSamplingUpdate(100, set2List);
+        List<Long> summaryOfSet2List = ssbdRandomSamplingUpdate(300, set2List);
         DataSet<Long> summaryOfSet2 = env.fromCollection(summaryOfSet2List);
 
         // Merge summaries of set1 and set2
-
+        List<Long> summaryOfAllSetsList = ssbdRandomSamplingMerge(200,
+                summaryOfSet1List, set1List.size(), summaryOfSet2List, set2List.size());
+        DataSet<Long> summaryOfAllSets = env.fromCollection(summaryOfAllSetsList);
 
         // print the result
         summaryOfSet1.print();
+        summaryOfSet2.print();
+        summaryOfAllSets.print();
         System.out.println("summary number of set1: " + summaryOfSet1.count());
         System.out.println("summary number of set2: " + summaryOfSet2.count());
-
+        System.out.println("summary number of all sets: " + summaryOfAllSets.count());
+        System.out.println("summary number from set1: "
+                + summaryOfAllSets.filter((FilterFunction<Long>) aLong -> aLong % 2 == 1).count()
+                + " summary number from set2: "
+                + summaryOfAllSets.filter((FilterFunction<Long>) aLong -> aLong % 2 == 0).count());
 
         // execute program
 //        env.execute("Random Sampling Algorithm Implementation Demo");
     }
 
+    /**
+     * This method mainly implement the Update Algorithm 2.4 in <i>Small Summaries for Big Data</i>.
+     * @param sampleNum     the cardinality of the output sample set.
+     * @param setA          the input set which will be sampled, which is List<Long> type.
+     * @return List<Long>   return the sample set of the input set.
+     * @throws IllegalArgumentException    if the input parameter is illegal, then throw a exception.
+     * @exception IllegalArgumentException if the input parameter is illegal, then throw this exception.
+     */
     public static List<Long> ssbdRandomSamplingUpdate(int sampleNum, List<Long> setA) {
-        // check the input parameters
+
+        // check input parameters
+        if (sampleNum <= 0) {
+            throw new IllegalArgumentException("sample number should be positive.");
+        }
         if (sampleNum > setA.size()) {
-            throw new IllegalArgumentException("sample number should be smaller than the cardinality of setA");
+            throw new IllegalArgumentException("sample number should be smaller than the cardinality of setA.");
         }
 
         // initiate the sample set based on the original set
@@ -103,6 +133,59 @@ public class RandomSamplingDemo {
         }
 
         return setS;
+    }
+
+    /**
+     * This method mainly implement the Merge Algorithm 2.5 in <i>Small Summaries for Big Data</i>.
+     * @param sampleNum     the cardinality of the sample set.
+     * @param sampleSet1    the input set 1 which will be merged.
+     * @param set1Num       the cardinality of the original set 1.
+     * @param sampleSet2    the input set 2 which will be merged.
+     * @param set2Num       the cardinality of the original set 2.
+     * @return List<Long>   return a sample set which is merged based on two sample sets.
+     * @throws IllegalArgumentException     if the input parameter is illegal, then throw a exception.
+     * @exception IllegalArgumentException  if the input parameter is illegal, then throw this exception.
+     */
+    public static List<Long> ssbdRandomSamplingMerge(int sampleNum,
+                                                     List<Long> sampleSet1,
+                                                     int set1Num,
+                                                     List<Long> sampleSet2,
+                                                     int set2Num) {
+
+        // check input parameters
+        if (sampleNum <= 0) {
+            throw new IllegalArgumentException("sample number should be positive.");
+        }
+        if (sampleNum > sampleSet1.size() + sampleSet2.size()) {
+            throw new IllegalArgumentException("sample number should be not greater than the sum of sets cardinality.");
+        }
+        if (set1Num <= 0 || set2Num <= 0) {
+            throw new IllegalArgumentException("the cardinality of original set should be positive.");
+        }
+
+        // initiate the parameters
+        int n1 = set1Num;
+        int n2 = set2Num;
+        int k1 = 0;
+        int k2 = 0;
+        Random random = new Random();
+        List<Long> summ = new ArrayList<>();
+
+        // get summary from the two sample sets
+        for (int index = 0; index < sampleNum; index++) {
+            int j = random.nextInt(n1 + n2);
+            if (j < n1) {
+                summ.add(sampleSet1.get(k1));
+                k1 = k1 + 1;
+                n1 = n1 - 1;
+            } else {
+                summ.add(sampleSet2.get(k2));
+                k2 = k1 + 1;
+                n2 = n2 - 1;
+            }
+        }
+
+        return summ;
     }
 
 }
