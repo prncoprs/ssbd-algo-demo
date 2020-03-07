@@ -230,10 +230,10 @@ public class RandomSamplingKafkaStreamDemo {
     }
 
 
-    public static class SimpleRandomSampleFunction extends KeyedProcessFunction<Tuple, com.ssbd.algorithms.randomsampling.SocketWindowWordCount.WordWithCount, String> {
+    public static class SimpleRandomSampleFunction extends KeyedProcessFunction<Tuple, WordWithCount, String> {
 
-        private ValueState<com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SamplePool> state;
-        private ListState<com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SampleNode> lstate;
+        private ValueState<SamplePool> state;
+        private ListState<SampleNode> lstate;
 
         private ValueState<Tuple2<Long, String>> myState;
 
@@ -243,13 +243,13 @@ public class RandomSamplingKafkaStreamDemo {
                     .newBuilder(org.apache.flink.api.common.time.Time.seconds(1))
                     .disableCleanupInBackground()
                     .build();
-            ValueStateDescriptor<com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SamplePool> stateDescriptor = new ValueStateDescriptor<>("mySampleState", com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SamplePool.class);
+            ValueStateDescriptor<SamplePool> stateDescriptor = new ValueStateDescriptor<>("mySampleState", SamplePool.class);
             stateDescriptor.enableTimeToLive(ttlConfig);
 
             state = getRuntimeContext()
                     .getState(stateDescriptor);
             lstate = getRuntimeContext()
-                    .getListState(new ListStateDescriptor<com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SampleNode>("myListState", com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SampleNode.class));
+                    .getListState(new ListStateDescriptor<SampleNode>("myListState", SampleNode.class));
 
             ValueStateDescriptor<Tuple2<Long, String>> descriptor =
                     new ValueStateDescriptor<>(
@@ -261,7 +261,7 @@ public class RandomSamplingKafkaStreamDemo {
         }
 
         @Override
-        public void processElement(com.ssbd.algorithms.randomsampling.SocketWindowWordCount.WordWithCount wc, Context ctx, Collector<String> out) throws Exception {
+        public void processElement(WordWithCount wc, Context ctx, Collector<String> out) throws Exception {
 
             Tuple2<Long, String> myCurr = myState.value();
 //            if(myCurr == null) {
@@ -284,9 +284,9 @@ public class RandomSamplingKafkaStreamDemo {
 //                System.out.println("itsn: " + itsn.next());
 //            }
 
-            com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SamplePool current = state.value();
+            SamplePool current = state.value();
             if (current == null) {
-                current = new com.ssbd.algorithms.randomsampling.SocketWindowWordCount.SamplePool();
+                current = new SamplePool();
             }
 
 
