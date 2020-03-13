@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * @ClassName RandomSamplingDemo
+ * @ClassName RandomSamplingDataSetDemo
  *
  * @Description This class shows a very simple demo procedure of random sampling algorithm. The random sampling
  * algorithm is introduced in section 2.2 and page 36 of <i>Small Summaries for Big Data</i> by
@@ -43,7 +43,7 @@ import java.util.Random;
  * @Author Chaoqi ZHANG
  * @Date 2020/2/29
  */
-public class RandomSamplingDemo {
+public class RandomSamplingDataSetDemo {
     public static void main(String[] args) throws Exception {
 
         // Checking input parameters

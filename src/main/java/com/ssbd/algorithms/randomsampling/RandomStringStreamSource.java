@@ -19,33 +19,51 @@ package com.ssbd.algorithms.randomsampling;
 
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 /**
- * @ClassName SetSourceGenerator
- * @Description TODO
+ * @ClassName RandomStringStreamSource
+ * @Description This class can generate random string with no more than 10 characters constantly.
  * @Author Chaoqi ZHANG
  * @Date 2020/2/26
  */
-public class StreamSetSource implements SourceFunction<Double> {
+public class RandomStringStreamSource implements SourceFunction<String> {
 
-    public static final Logger logger = LoggerFactory.getLogger(StreamSetSource.class);
-
+    public static final Logger logger = LoggerFactory.getLogger(RandomStringStreamSource.class);
+    private long seed;
     private volatile boolean isRunning = true;
+    private Random random;
+
+    RandomStringStreamSource() {
+        super();
+        this.seed = System.currentTimeMillis();
+        this.random = new Random(seed);
+    }
+
+    RandomStringStreamSource(long seed) {
+        super();
+        this.seed = seed;
+        this.random = new Random(seed);
+    }
 
     @Override
-    public void run(SourceContext<Double> sourceContext) throws Exception {
+    public void run(SourceContext<String> sourceContext) throws Exception {
 
         while (isRunning) {
-            Thread.sleep(1000);
-            Random r = new Random();
-            Double num = r.nextGaussian();
-            sourceContext.collect(num);
-            logger.debug(String.valueOf(num));
+            Thread.sleep(500);
+
+            int n = random.nextInt(10) + 1;
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < n; i++) {
+                int j = random.nextInt(26);
+                char t = (char) ('a' + j);
+                sb.append(t);
+            }
+
+            sourceContext.collect(sb.toString());
         }
 
     }
