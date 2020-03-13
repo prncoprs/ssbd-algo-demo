@@ -42,7 +42,7 @@ import java.util.Properties;
 
 
 /**
- * @ClassName SimpleRandomSampleKafkaStreamDemo
+ * @ClassName RandomSampleKafkaStreamDemo
  * @Description This class shows a very simple demo procedure of random sampling algorithm. The random sampling
  * algorithm is introduced in section 2.2 and page 36 of <i>Small Summaries for Big Data</i> by
  * <i>Graham Cormode and Ke Yi</i>.
@@ -51,7 +51,7 @@ import java.util.Properties;
  * @Author Chaoqi ZHANG
  * @Date 2020/3/11
  */
-public class SimpleRandomSampleKafkaStreamDemo {
+public class RandomSampleKafkaStreamDemo {
 
     public static void main(String[] args) throws Exception {
 
@@ -65,8 +65,6 @@ public class SimpleRandomSampleKafkaStreamDemo {
         String sample1KafkaTopic = "ssbd-sample1";
         String sample2KafkaTopic = "ssbd-sample2";
         String mergedKafkaTopic = "ssbd-merged";
-
-
 
         // configure the kafka consumer properties
         Properties consumerConfig = new Properties();
