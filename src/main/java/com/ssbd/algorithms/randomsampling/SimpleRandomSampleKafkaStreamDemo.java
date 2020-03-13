@@ -66,19 +66,21 @@ public class SimpleRandomSampleKafkaStreamDemo {
         String sample2KafkaTopic = "ssbd-sample2";
         String mergedKafkaTopic = "ssbd-merged";
 
+
+
+        // configure the kafka consumer properties
+        Properties consumerConfig = new Properties();
+        consumerConfig.setProperty("bootstrap.servers", "localhost:9092");
+
         // ATTENTION: if you want to use kafka as source, please uncomment the code below
 
-//        // configure the kafka source1
-//        Properties properties = new Properties();
-//        properties.setProperty("bootstrap.servers", "localhost:9092");
-//
 //        // add the kafka source 1
 //        DataStream<String> input1 = env
-//                .addSource(new FlinkKafkaConsumer<>(input1KafkaTopic, new SimpleStringSchema(), properties));
+//                .addSource(new FlinkKafkaConsumer<>(input1KafkaTopic, new SimpleStringSchema(), consumerConfig));
 //
 //        // add the kafka source 2
 //        DataStream<String> input2 = env
-//                .addSource(new FlinkKafkaConsumer<>(input2KafkaTopic, new SimpleStringSchema(), properties));
+//                .addSource(new FlinkKafkaConsumer<>(input2KafkaTopic, new SimpleStringSchema(), consumerConfig));
 
 
         // ATTENTION: if you want to use self-constructed random string as source, please do not uncomment the code below
@@ -157,7 +159,6 @@ public class SimpleRandomSampleKafkaStreamDemo {
                         producerConfig,
                         FlinkKafkaProducer.Semantic.NONE);
         sampled1Producer.setWriteTimestampToKafka(true);
-        sampled1.addSink(sampled1Producer);
 
         // add the sampled 2 kafka producer
         FlinkKafkaProducer<SamplePool<String>> sampled2Producer =
@@ -166,7 +167,6 @@ public class SimpleRandomSampleKafkaStreamDemo {
                         producerConfig,
                         FlinkKafkaProducer.Semantic.NONE);
         sampled1Producer.setWriteTimestampToKafka(true);
-        sampled2.addSink(sampled2Producer);
 
         // add the merged kafka producer
         FlinkKafkaProducer<SamplePool<String>> mergedProducer =
@@ -175,7 +175,12 @@ public class SimpleRandomSampleKafkaStreamDemo {
                         producerConfig,
                         FlinkKafkaProducer.Semantic.NONE);
         sampled1Producer.setWriteTimestampToKafka(true);
-        merged.addSink(mergedProducer);
+
+
+        // ATTENTION: if you want to use kafka as output, please uncomment the code below
+//        sampled1.addSink(sampled1Producer);
+//        sampled2.addSink(sampled2Producer);
+//        merged.addSink(mergedProducer);
 
         // execute
         env.execute("Simple Random Sample Kafka Stream Demo");
@@ -260,7 +265,7 @@ public class SimpleRandomSampleKafkaStreamDemo {
             if(this.sampleSize <= 0) {
                 throw new IllegalArgumentException("sample size should be greater than zero.");
             }
-            
+
             // increase the stream size per update action
             streamSize += 1L;
 
