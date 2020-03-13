@@ -257,6 +257,10 @@ public class SimpleRandomSampleKafkaStreamDemo {
          */
         public T update(T t) {
 
+            if(this.sampleSize <= 0) {
+                throw new IllegalArgumentException("sample size should be greater than zero.");
+            }
+            
             // increase the stream size per update action
             streamSize += 1L;
 
